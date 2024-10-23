@@ -49,10 +49,10 @@ model Post {
 model PostMedia {
   id         String    @id @default(uuid()) // UUID as the ID type
   post_id    String
-  media_type String   @db.VarChar(50)
-  media_url  String   @db.VarChar(255)
-  created_at DateTime @default(now())
-  post       Post     @relation(fields: [post_id], references: [id]) // Foreign key referencing posts
+  media_type String?   @db.VarChar(50)  // Optional media type
+  media_url  String?   @db.VarChar(255) // Optional media URL
+  created_at DateTime  @default(now())
+  post       Post      @relation(fields: [post_id], references: [id]) // Foreign key referencing posts
 }
 
 // Model for comments table
@@ -71,7 +71,7 @@ model Comment {
 model Category {
   id          String  @id @default(uuid()) // UUID as the ID type
   name        String  @unique @db.VarChar(100)
-  description String @db.VarChar(100)
+  description String 
   posts       Post[]  // One-to-many relationship with posts
 }
 

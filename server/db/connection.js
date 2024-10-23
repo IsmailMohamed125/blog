@@ -9,6 +9,8 @@ if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL not set");
 }
 
+console.log(process.env.DATABASE_URL);
+
 const pool = new Pool();
 
 module.exports = pool;
