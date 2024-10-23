@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// Define the PostgreSQL datasource
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Define the generator for Prisma Client
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Model for users table
+model User {
+  id         String    @id @default(uuid()) // UUID as the ID type
+  username   String    @unique @db.VarChar(50)
+  email      String    @unique @db.VarChar(100)
+  password   String    @db.VarChar(255)
+  avatar_url String?   @db.VarChar(255) // Optional avatar URL
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt        // Automatically updates on change
+  posts      Post[]    // One-to-many relationship with posts
+  comments   Comment[] // One-to-many relationship with comments
+}
+
+// Model for posts table
+model Post {
+  id          String      @id @default(uuid()) // UUID as the ID type
+  title       String      @db.VarChar(255)
+  content     String
+  author_id   String
+  category_id String
+  likes       Int         @default(0)
+  created_at  DateTime    @default(now())
+  updated_at  DateTime    @updatedAt          // Automatically updates on change
+  author      User        @relation(fields: [author_id], references: [id])  // Foreign key referencing users
+  category    Category    @relation(fields: [category_id], references: [id]) // Required category
+  comments    Comment[]   // One-to-many relationship with comments
+  media       PostMedia[] // One-to-many relationship with post media
+  tags        Tag[]        // Many-to-many relationship with tags (Prisma handles join table)
+}
+
+// Model for post_media table
+model PostMedia {
+  id         String    @id @default(uuid()) // UUID as the ID type
+  post_id    String
+  media_type String   @db.VarChar(50)
+  media_url  String   @db.VarChar(255)
+  created_at DateTime @default(now())
+  post       Post     @relation(fields: [post_id], references: [id]) // Foreign key referencing posts
+}
+
+// Model for comments table
+model Comment {
+  id           String    @id @default(uuid()) // UUID as the ID type
+  post_id      String
+  user_id      String
+  comment_text String
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt          // Automatically updates on change
+  post         Post     @relation(fields: [post_id], references: [id]) // Foreign key referencing posts
+  user         User     @relation(fields: [user_id], references: [id]) // Foreign key referencing users
+}
+
+// Model for categories table
+model Category {
+  id          String  @id @default(uuid()) // UUID as the ID type
+  name        String  @unique @db.VarChar(100)
+  description String @db.VarChar(100)
+  posts       Post[]  // One-to-many relationship with posts
+}
+
+// Model for tags table
+model Tag {
+  id    String  @id @default(uuid()) // UUID as the ID type
+  name  String  @unique @db.VarChar(100)
+  posts Post[]  // Many-to-many relationship with posts
+}
+
