@@ -1,6 +1,5 @@
-const { PrismaClient } = require("@prisma/client");
-
-const prisma = new PrismaClient();
+const prisma = require("../prisma");
+const bcryptjs = require("bcryptjs");
 
 const seed = async ({
   usersData,
@@ -19,6 +18,11 @@ const seed = async ({
     await prisma.user.deleteMany();
 
     // Step 1: Seed Users, Categories, and Tags
+    const salt = await bcryptjs.genSalt(10);
+    for (const user of usersData) {
+      const hashPassword = await bcryptjs.hash(user.password, salt);
+      user.password = hashPassword;
+    }
     await prisma.user.createMany({ data: usersData });
     await prisma.category.createMany({ data: categoriesData });
     await prisma.tag.createMany({ data: tagsData });
@@ -131,6 +135,7 @@ const seed = async ({
 
     console.log("Database seeding completed successfully!");
   } catch (error) {
+    console.log(error);
     console.error("Error seeding database:", error);
   } finally {
     await prisma.$disconnect();
